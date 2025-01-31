@@ -1,0 +1,5 @@
+django==5.1.5
+djangorestframework==3.15.2
+python-dotenv==1.0.1
+python-telegram-bot==21.10
+aiohttp==3.11.11
