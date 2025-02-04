@@ -1,120 +1,90 @@
-from typing import Final, List
+import os
+import sys
+from pathlib import Path
+from typing import Final
+import logging
 import asyncio
 
-from telegram import Update
-from telegram.ext import (
-    Application,
-    CommandHandler,
-    MessageHandler,
-    filters,
-    ContextTypes,
-)
-from django.urls import reverse
+from aiogram import Bot, Dispatcher, html
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
+from aiogram.filters import CommandStart, Command
+from aiogram.types import Message
+
 import aiohttp
 
+from dotenv import load_dotenv
 from utils import imei_valid
 
-# from utils.functions import imei_valid
+BASE_DIR = Path(__file__).resolve().parent.parent
+env_file = os.path.join(BASE_DIR.parent, ".env")
+load_dotenv(env_file)
 
 
-TOKEN: Final = "7988436281:AAEvGkt6BsU3UiMRrFZ6jBV2nOIhTBhhr3w"
+TOKEN: Final = os.environ["BOT_TOKEN"]
 BOT_USERNAME: Final = "IMEI_API_BOT"
 
 
-async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Hello! I am \nG R U T")
+dp = Dispatcher()
 
 
-async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Type in IMEI so that I check it out")
+@dp.message(CommandStart())
+async def command_start_handler(message: Message) -> None:
+    """
+    This handler receives messages with `/start` command
+    """
+    # Most event objects have aliases for API methods that can be called in events' context
+    # For example if you want to answer to incoming message you can use `message.answer(...)` alias
+    # and the target chat will be passed to :ref:`aiogram.methods.send_message.SendMessage`
+    # method automatically or call API method directly via
+    # Bot instance: `bot.send_message(chat_id=message.chat.id, ...)`
+    await message.answer(f"Hello, {html.bold(message.from_user.full_name)}!")
 
 
-async def custom_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("No idea what I'm doing")
+@dp.message(Command("imei"))
+async def imei_handler(message: Message) -> None:
+    # try:
+    text = message.text.strip("imei/ ")
 
-
-async def process_imei(
-    imei: str, session: aiohttp.ClientSession
-) -> (str, List[str]):
-    # returns API response and list of errors
-    # if not imei_valid(imei):
-    async with session.post(
-        reverse("api:imei_check", kwargs={"imei": imei, "token": "BOT_TOKEN"})
-    ) as resp:
-        return str(await resp.json()), []
-
-
-async def imei_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not context.args:
-        await update.message.reply_text(
-            "Please provide an IMEI number. Example: /imei 123456789012345"
-        )
+    # log.info(text)
+    if not imei_valid(text):
+        await message.answer("invalid IMEI!")
         return
-
-    imei = context.args[0]
-    if not imei_valid(imei):
-        await update.message.reply_text(f"Invalid IMEI")
-        return
-
-    response, errors = await process_imei(imei, context.bot_data["session"])
-
-    await update.message.reply_text(f"API Response: {response}")
-
-
-def handle_response(text: str) -> str:
-    if "hello" in text.lower():
-        return "HIHIHIHIHI"
-    return 'SOOOOO can you tell me "hello" pweeease???'
-
-
-async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    message_type: str = update.message.chat.type
-
-    text: str = update.message.text
-    print(f'User ({update.message.chat.id}) in {message_type}: "text"')
-
-    response: str = "default response for non-private messages"
-    if message_type == "private":
-        response: str = handle_response(text)
-
-    print(f"Bot: {response}")
-    await update.message.reply_text(response)
-
-
-async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    print(f"Update {update} caused error {context.error}")
-
-
-async def run_bot():
-    print("Starting bot...")
-    app = Application.builder().token(TOKEN).build()
-
+    # except TypeError as e:
+    #     await message.answer(f"INVALID MESSAGE, error occurred: {e}")
     async with aiohttp.ClientSession() as session:
-        app.bot_data["session"] = session
-        handler = CommandHandler("imei", imei_command)
+        async with session.get(f"http://127.0.0.1:8000/api/check-imei?imei={text}&token=4562") as response:
+            log = logging.getLogger(__name__)
+            ans = await response.json()
+            text = await response.text()
+            # log.info(ans)
+            log.info(text)
+            await message.answer(f"IMEI DATA:\n{ans}")
 
-        app.add_handler(handler)
 
-        app.add_error_handler(error)
+@dp.message()
+async def echo_handler(message: Message) -> None:
+    """
+    Handler will forward receive a message back to the sender
 
-        print("Polling...")
-        app.run_polling(poll_interval=3)
+    By default, message handler will handle all message types (like a text, photo, sticker etc.)
+    """
+    try:
+        # Send a copy of the received message
+        await message.send_copy(chat_id=message.chat.id)
+    except TypeError:
+        # But not all the types is supported to be copied so need to handle it
+        await message.answer("Nice try!")
+
+
+async def main() -> None:
+    # Initialize Bot instance with default bot properties which will be passed to all API calls
+    bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+
+    # And the run events dispatching
+    await dp.start_polling(bot)
 
 
 if __name__ == "__main__":
-    # print('main function cycle')
-    try:
-        print('try statement entrance')
-        loop = asyncio.get_running_loop()
-        loop.create_task(run_bot())  # Schedule the bot
-    except RuntimeError:
-        print('error raised')
-        asyncio.run(run_bot())
-
-__all__ = [
-    "start_command",
-    "help_command",
-    "custom_command",
-    "handle_message",
-    "error",
-]
+    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+    asyncio.run(main())

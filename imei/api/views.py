@@ -2,6 +2,7 @@ import json
 from http import HTTPStatus
 
 from django.http import HttpResponse
+from django.utils.decorators import classonlymethod
 from rest_framework.response import Response
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.authtoken.models import Token
@@ -36,10 +37,10 @@ class QueryParamTokenAuthentication(BaseAuthentication):
 
 class CheckImei(APIView):
 
-    authentication_classes = [QueryParamTokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [QueryParamTokenAuthentication]
+    # permission_classes = [IsAuthenticated]
 
-    def post(self, request, format=None):
+    def get(self, request, format=None):
         imei = request.GET.get("imei")
         if imei is None:
             return Response(
@@ -56,8 +57,7 @@ class CheckImei(APIView):
             "Content-Type": "application/json",
         }
 
-        body = json.dumps({"deviceId": imei, "serviceId": 15})
+        payload = json.dumps({"deviceId": imei, "serviceId": 15})
+        response = requests.post(IMEICHECK_URL, headers=headers, data=payload)
 
-        response = requests.post(IMEICHECK_URL, headers=headers, data=body)
-
-        return Response(data=response.json(), status=response.status_code)
+        return Response(data=response.json(), status=response.status_code, content_type="application/json")
