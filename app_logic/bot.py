@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Final
 import logging
 import asyncio
+import argparse
 
 from aiogram import Bot, Dispatcher, html
 from aiogram.client.default import DefaultBotProperties
@@ -17,13 +18,26 @@ import aiohttp
 from dotenv import load_dotenv
 from utils import imei_valid
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+
+BASE_DIR = Path(__file__).resolve().parent
 env_file = os.path.join(BASE_DIR.parent, ".env")
 load_dotenv(env_file)
+if os.path.isfile(env_file):
+    load_dotenv(env_file)
+else:
+    load_dotenv(os.path.join(BASE_DIR, ".env.example"))
+
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--api-path", dest="api_path", type=str, help="Add product_id"
+)
+args = parser.parse_args()
 
 
-TOKEN: Final = os.environ["BOT_TOKEN"]
+TOKEN: Final = os.getenv("BOT_TOKEN")
 BOT_USERNAME: Final = "IMEI_API_BOT"
+API_APP_NAME: Final = os.getenv("APP_NAME")
+API_PATH: Final = args.api_path
 
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher(storage=MemoryStorage())
@@ -41,7 +55,7 @@ async def on_shutdown():
 
 
 @dp.message(CommandStart())
-async def command_start_handler(message: Message) -> None:`
+async def command_start_handler(message: Message) -> None:
     await message.answer(f"Hello, {html.bold(message.from_user.full_name)}!")
 
 
@@ -49,7 +63,9 @@ async def command_start_handler(message: Message) -> None:`
 async def imei_handler(message: Message) -> None:
     text = message.text.strip("imei/ ")
 
-    await message.answer(f"Your imei ({text}) was taken into execution; expect answer")
+    await message.answer(
+        f"Your imei ({text}) was taken into execution; expect answer"
+    )
 
     if not imei_valid(text):
         await message.answer("invalid IMEI!")
@@ -57,7 +73,13 @@ async def imei_handler(message: Message) -> None:
 
     data = await dp.storage.get_data("storage")
     session: aiohttp.ClientSession = data["session"]
-    async with session.get(f"http://127.0.0.1:8000/api/check-imei?imei={text}&token=4562") as response:
+
+    params = {
+        "imei": text,
+        "token": 4512,
+    }
+
+    async with session.get(API_PATH, params=params) as response:
         log = logging.getLogger(__name__)
         ans = await response.json()
         text = await response.text()

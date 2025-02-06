@@ -5,10 +5,12 @@ Telegram bot (bot.py) must be activated in a different process after starting an
 assuming you have already installed all required packages and switched to imei/api, firstly
 start an API:
 ```bash
-python manage.py runserver
+sanic server:app
 ```
 
-then, in different CLI, start bot:
+bot is sarted automatically; however, if you want to activate bot sepcifically, you will 
+have to provide api-path argument in CLI command, just like that:
+
 ```bash
-python bot.py
+python bot.py --api-path <your_path_here>
 ```

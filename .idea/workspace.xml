@@ -5,10 +5,26 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e6a2d670-177e-4fcf-972d-fa1b4a0b5fca" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/app_logic/bot.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app_logic/server.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app_logic/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/imei/api/bot.py" beforeDir="false" afterPath="$PROJECT_DIR$/imei/api/bot.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/imei/api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/imei/api/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/imei/api/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/imei/api/apps.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/imei/api/bot.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/imei/api/migrations/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/imei/api/models.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/imei/api/serializers.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/imei/api/urls.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/imei/api/utils.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/imei/api/views.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/imei/imei/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/imei/imei/settings.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/imei/imei/urls.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/imei/imei/wsgi.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/imei/manage.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,7 +50,8 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/imei/api/bot.py" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
