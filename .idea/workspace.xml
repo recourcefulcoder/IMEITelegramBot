@@ -5,26 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e6a2d670-177e-4fcf-972d-fa1b4a0b5fca" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/app_logic/bot.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app_logic/server.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app_logic/utils.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/imei/api/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/imei/api/apps.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/imei/api/bot.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/imei/api/migrations/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/imei/api/models.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/imei/api/serializers.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/imei/api/urls.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/imei/api/utils.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/imei/api/views.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/imei/imei/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/imei/imei/settings.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/imei/imei/urls.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/imei/imei/wsgi.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/imei/manage.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app_logic/bot.py" beforeDir="false" afterPath="$PROJECT_DIR$/app_logic/bot.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app_logic/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/app_logic/server.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -40,6 +25,14 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
   </component>
   <component name="ProjectId" id="2sJJHi4rHCCyNRCbUtszLxcob2t" />
   <component name="ProjectViewState">

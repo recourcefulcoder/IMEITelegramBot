@@ -1,6 +1,6 @@
 import os
+import subprocess
 from pathlib import Path
-# import subprocess
 
 from dotenv import load_dotenv
 
@@ -20,7 +20,9 @@ else:
 
 IMEICHECK_URL: Final = "https://api.imeicheck.net/v1/checks"
 IMEICHECK_TOKEN: Final = os.getenv("IMEICHECK_TOKEN")
-app = Sanic(os.getenv("APP_NAME"))
+BOTFILE_NAME: Final = "bot.py"
+
+app = Sanic("IMEI")
 
 
 @app.after_server_start
@@ -32,6 +34,15 @@ async def open_session(app):
     app.ctx.aiohttp_session: aiohttp.ClientSession = aiohttp.ClientSession(
         headers=headers
     )
+    url = app.url_for(
+        "check-imei",
+        _external=True,
+        _server="localhost:8000"
+    )
+    subprocess.Popen(
+        f"python {BOTFILE_NAME} --api-path {url}",
+        shell=True,
+    )
 
 
 @app.before_server_stop
@@ -39,7 +50,7 @@ async def close_session(app):
     await app.ctx.aiohttp_session.close()
 
 
-@app.post("/check-imei")
+@app.post("/check-imei", name="check-imei")
 async def get_imei_info(request):
     token = request.token
     # auth for my API must be written later
@@ -53,11 +64,8 @@ async def get_imei_info(request):
         IMEICHECK_URL, json=payload
     ) as response:
         ans = await response.json()
-
     return json(ans)
 
 
 if __name__ == "__main__":
     app.run()
-    # process = subprocess.run(f"bot.py --api-path {app.get_url('get_imei_info')}")
-    # print(process)

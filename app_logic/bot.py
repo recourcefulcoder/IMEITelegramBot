@@ -36,7 +36,6 @@ args = parser.parse_args()
 
 TOKEN: Final = os.getenv("BOT_TOKEN")
 BOT_USERNAME: Final = "IMEI_API_BOT"
-API_APP_NAME: Final = os.getenv("APP_NAME")
 API_PATH: Final = args.api_path
 
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
@@ -79,12 +78,12 @@ async def imei_handler(message: Message) -> None:
         "token": 4512,
     }
 
-    async with session.get(API_PATH, params=params) as response:
+    async with session.post(API_PATH, params=params) as response:
         log = logging.getLogger(__name__)
-        ans = await response.json()
+        # ans = await response.json()
         text = await response.text()
         log.info(text)
-        await message.answer(f"IMEI DATA:\n{ans}")
+        await message.answer(f"IMEI DATA:\n{text}")
 
 
 @dp.message()
