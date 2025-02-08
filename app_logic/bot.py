@@ -1,7 +1,7 @@
 import os
 import sys
 from pathlib import Path
-from typing import Final
+from typing import Final, Dict, Any, Callable, Awaitable
 import logging
 import asyncio
 import argparse
@@ -10,7 +10,7 @@ from aiogram import Bot, Dispatcher, html
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart, Command
-from aiogram.types import Message
+from aiogram.types import Message, Update
 from aiogram.fsm.storage.memory import MemoryStorage
 
 import aiohttp
@@ -37,9 +37,21 @@ args = parser.parse_args()
 TOKEN: Final = os.getenv("BOT_TOKEN")
 BOT_USERNAME: Final = "IMEI_API_BOT"
 API_PATH: Final = args.api_path
+ID_WHITELIST: Final = {7835373811}
 
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher(storage=MemoryStorage())
+
+
+@dp.message.outer_middleware()
+async def user_allowed(
+        handler: Callable[[Message, Dict[str, Any]], Awaitable[Any]],
+        event: Message,
+        data: Dict[str, Any]
+    ) -> Any:
+    if event.from_user.id not in ID_WHITELIST:
+        return await event.answer(f"Unauthorized: id {event.from_user.id} not allowed")
+    return await handler(event, data)
 
 
 async def on_startup():
@@ -96,7 +108,6 @@ async def echo_handler(message: Message) -> None:
 
 async def main() -> None:
     await on_startup()
-
     try:
         await dp.start_polling(bot)
     finally:
