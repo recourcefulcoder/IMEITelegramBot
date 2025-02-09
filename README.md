@@ -34,6 +34,7 @@ Whole logic is stored in two separate files:
 Environmental variables:
 + **BOT_TOKEN** - stores [telegram bot token](https://core.telegram.org/bots/tutorial#obtain-your-bot-token)
 + **IMEICHECK_TOKEN** - stores token for accessing [imeicheck.net API](https://imeicheck.net/promo-api)
++ **API_TOKEN** - token for bot to access the API service
 
 
 #### File-stored constants:
@@ -46,5 +47,6 @@ related to current server.py file location
 ##### bot.py
 + **TOKEN** representing telegram bot token
 + **BOT_USERNAME**
-+ **API_PATH** representing URL to API bot is addressing to
 + **ID_WHITELIST** - set of ints, representing allowed telegram user id's
++ **API_PATH** representing URL to API bot is addressing to
++ **API_TOKEN** storing token for accessing the API

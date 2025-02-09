@@ -36,8 +36,10 @@ args = parser.parse_args()
 
 TOKEN: Final = os.getenv("BOT_TOKEN")
 BOT_USERNAME: Final = "IMEI_API_BOT"
-API_PATH: Final = args.api_path
 ID_WHITELIST: Final = {7835373811}
+
+API_PATH: Final = args.api_path
+API_TOKEN: Final = os.getenv("API_TOKEN")
 
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher(storage=MemoryStorage())
@@ -55,7 +57,7 @@ async def user_allowed(
 
 
 async def on_startup():
-    session = aiohttp.ClientSession()
+    session = aiohttp.ClientSession(headers={"Authorization": f"Bearer {API_TOKEN}"})
     await dp.storage.set_data(key="storage", data={"session": session})
 
 

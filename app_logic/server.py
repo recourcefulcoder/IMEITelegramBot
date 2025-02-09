@@ -9,6 +9,8 @@ from sanic import Sanic, json
 
 import aiohttp
 
+import ujson
+
 
 BASE_DIR = Path(__file__).resolve().parent
 env_file = os.path.join(BASE_DIR.parent, ".env")
@@ -21,6 +23,8 @@ else:
 IMEICHECK_URL: Final = "https://api.imeicheck.net/v1/checks"
 IMEICHECK_TOKEN: Final = os.getenv("IMEICHECK_TOKEN")
 BOTFILE_NAME: Final = "bot.py"
+with open(os.path.join(BASE_DIR.parent, "tokens.json"), "r") as f:
+    TOKENS: Final = ujson.load(f)
 
 app = Sanic("IMEI")
 
