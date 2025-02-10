@@ -7,17 +7,23 @@ with telegram bot integrated.
 
 
 ### Running guide 
-assuming you have already installed all required packages and switched to imei/api, firstly
-start an API:
+assuming you have already installed all required packages and switched to imei/api, tu run an API 
+in debug mode run the following command in CLI:
 ```bash
-sanic server:app
+sanic server:app --debug
 ```
 
 bot is started automatically; however, if you want to activate bot explicitly, you will 
-have to provide api-path argument in CLI command, just like that:
+have to provide api-path argument in CLI command. Supported arguments for running bot.py are:
++ --api-url (defaults to "http://localhost:8000") - represents URL of API-service for bot to interact with
++ --refresh-end (defaults to "refresh/") - represents API endpoint for refreshing access token
++ --login-end (defaults to "login/") - represents API login endpoint
++ --main-end (defaults to "/check-imei") - represents API endpoint which handles main functionality 
+(translating IMEI check request to side API)
 
+you can run bot explicitly with this command:
 ```bash
-python bot.py --api-path <your_path_here>
+python bot.py --api-url <your_path_here> --login-url <corresponsing endpoint> --refresh-end <corr. endpoint> --main-end <corr.endpoint>
 ```
 
 ### Docs
@@ -30,12 +36,16 @@ Whole logic is stored in two separate files:
 > describing the bot behavior; if you will EVER change this file's name/location, make sure 
 > to change this constant on your own!
 
+> [!CAUTION]
+> Since database is not included in the project yet, it uses some _temporary_ improper storages of 
+> login credentials - Bot's password for accessing API is stored in an environment variable, for example,
+> as you will see lower. This must be changed in production use, yet is not in a current state.
 
 Environmental variables:
 + **BOT_TOKEN** - stores [telegram bot token](https://core.telegram.org/bots/tutorial#obtain-your-bot-token)
 + **IMEICHECK_TOKEN** - stores token for accessing [imeicheck.net API](https://imeicheck.net/promo-api)
-+ **API_TOKEN** - token for bot to access the API service
-
++ **API_BOT_PASSWORD** - Bot's password for accessing API
++ **SECRET_KEY** - used for JWT-based auth
 
 #### File-stored constants:
 ##### server.py
@@ -48,5 +58,20 @@ related to current server.py file location
 + **TOKEN** representing telegram bot token
 + **BOT_USERNAME**
 + **ID_WHITELIST** - set of ints, representing allowed telegram user id's
-+ **API_PATH** representing URL to API bot is addressing to
-+ **API_TOKEN** storing token for accessing the API
++ **API_URL** representing URL to API bot is addressing to for main functionality
++ **LOGIN_ENDPOINT** representing API's _login_ url
++ **MAIN_ENDPOINT** representing API's _main_ url
++ **REFRESH_ENDPOINT** representing API's _refresh_ url
++ **API_PASSWORD** storing token for accessing the API
+
+##### login.py
++ **refresh_tokens** - temporary solution for storing refreshed tokens without database connected;
+used in sevrer.py file in authorization purposes
+
+### Auth mechanism
+When logging in, bot sends json payload which looks like following: 
+```python
+{
+    "password": BOT_PASSWORD
+}
+```

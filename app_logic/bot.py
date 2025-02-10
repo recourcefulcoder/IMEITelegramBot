@@ -1,21 +1,24 @@
+import argparse
+import asyncio
+import logging
 import os
 import sys
+from http import HTTPStatus
 from pathlib import Path
-from typing import Final, Dict, Any, Callable, Awaitable
-import logging
-import asyncio
-import argparse
+from typing import Any, Awaitable, Callable, Dict, Final
 
 from aiogram import Bot, Dispatcher, html
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
-from aiogram.filters import CommandStart, Command
-from aiogram.types import Message, Update
+from aiogram.exceptions import AiogramError
+from aiogram.filters import Command, CommandStart
 from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.types import Message
 
 import aiohttp
 
 from dotenv import load_dotenv
+
 from utils import imei_valid
 
 
@@ -29,7 +32,32 @@ else:
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    "--api-path", dest="api_path", type=str, help="Add product_id"
+    "--api-url",
+    dest="api_url",
+    type=str,
+    help="API's base URL",
+    default="http://localhost:8000",
+)
+parser.add_argument(
+    "--login-end",
+    dest="login_endpoint",
+    type=str,
+    help="API's login endpoint",
+    default="login/",
+)
+parser.add_argument(
+    "--refresh-end",
+    dest="refresh_endpoint",
+    type=str,
+    help="API's refreshing token endpoint",
+    default="refresh/",
+)
+parser.add_argument(
+    "--main-end",
+    dest="main_endpoint",
+    type=str,
+    help="API's main functionality endpoint",
+    default="/check-imei",
 )
 args = parser.parse_args()
 
@@ -38,27 +66,82 @@ TOKEN: Final = os.getenv("BOT_TOKEN")
 BOT_USERNAME: Final = "IMEI_API_BOT"
 ID_WHITELIST: Final = {7835373811}
 
-API_PATH: Final = args.api_path
-API_TOKEN: Final = os.getenv("API_TOKEN")
+API_URL: Final = args.api_url
+LOGIN_ENDPOINT: Final = args.login_endpoint
+MAIN_ENDPOINT: Final = args.main_endpoint
+REFRESH_ENDPOINT: Final = args.refresh_endpoint
+
+API_PASSWORD: Final = os.getenv("API_BOT_PASSWORD")
 
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher(storage=MemoryStorage())
 
 
+class TokenHolder:
+    def __init__(self):
+        self.access_token = None
+        self.refresh_token = None
+
+
+token_holder = TokenHolder()
+
+
+class AuthorizationError(BaseException):
+    pass
+
+
 @dp.message.outer_middleware()
 async def user_allowed(
-        handler: Callable[[Message, Dict[str, Any]], Awaitable[Any]],
-        event: Message,
-        data: Dict[str, Any]
-    ) -> Any:
+    handler: Callable[[Message, Dict[str, Any]], Awaitable[Any]],
+    event: Message,
+    data: Dict[str, Any],
+) -> Any:
     if event.from_user.id not in ID_WHITELIST:
-        return await event.answer(f"Unauthorized: id {event.from_user.id} not allowed")
+        return await event.answer(
+            f"Unauthorized: id {event.from_user.id} not allowed"
+        )
     return await handler(event, data)
 
 
+async def login(session: aiohttp.ClientSession):
+    async with session.post(
+        f"{API_URL}/{LOGIN_ENDPOINT}", json={"password": API_PASSWORD}
+    ) as resp:
+        data = await resp.json()
+        if resp.status == HTTPStatus.OK:
+            token_holder.access_token = data["access_token"]
+            token_holder.refresh_token = data["refresh_token"]
+        elif resp.status == HTTPStatus.UNAUTHORIZED:
+            print(data, resp.status)
+            raise AuthorizationError(
+                "Critical error - invalid bot auth credentials!"
+            )
+        else:
+            raise AiogramError("Unexpected server error on login")
+
+
+async def refresh_token_func(session):
+    """Refresh the access token"""
+    async with session.post(
+        f"{API_URL}/{REFRESH_ENDPOINT}",
+        json={"refresh_token": token_holder.refresh_token},
+    ) as resp:
+        data = await resp.json()
+        if resp.status == HTTPStatus.OK:
+            token_holder.access_token = data["access_token"]
+        else:
+            raise AuthorizationError("Unexpected error occured")
+
+
 async def on_startup():
-    session = aiohttp.ClientSession(headers={"Authorization": f"Bearer {API_TOKEN}"})
-    await dp.storage.set_data(key="storage", data={"session": session})
+    session = aiohttp.ClientSession()
+    # login_task = asyncio.create_task(login(session))
+    storage_task = asyncio.create_task(
+        dp.storage.set_data(key="storage", data={"session": session})
+    )
+
+    # await login_task
+    await storage_task
 
 
 async def on_shutdown():
@@ -92,9 +175,12 @@ async def imei_handler(message: Message) -> None:
         "token": 4512,
     }
 
-    async with session.post(API_PATH, params=params) as response:
+    async with session.post(
+        f"{API_URL}{MAIN_ENDPOINT}/",
+        params=params,
+        headers={"Authorization": f"Bearer {token_holder.access_token}"},
+    ) as response:
         log = logging.getLogger(__name__)
-        # ans = await response.json()
         text = await response.text()
         log.info(text)
         await message.answer(f"IMEI DATA:\n{text}")

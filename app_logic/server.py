@@ -1,15 +1,20 @@
 import os
 import subprocess
+from http import HTTPStatus
 from pathlib import Path
-
-from dotenv import load_dotenv
-
 from typing import Final
-from sanic import Sanic, json
 
 import aiohttp
 
+from dotenv import load_dotenv
+
+import login as app_login
+
+from sanic import Sanic, json
+
 import ujson
+
+# from auth import protected
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -27,10 +32,12 @@ with open(os.path.join(BASE_DIR.parent, "tokens.json"), "r") as f:
     TOKENS: Final = ujson.load(f)
 
 app = Sanic("IMEI")
+app.config.SECRET = os.getenv("SECRET_KEY")
+app.blueprint(app_login.login)
 
 
 @app.after_server_start
-async def open_session(app):
+async def start_bot(app):
     headers = {
         "Authorization": "Bearer " + IMEICHECK_TOKEN,
         "Content-Type": "application/json",
@@ -38,13 +45,21 @@ async def open_session(app):
     app.ctx.aiohttp_session: aiohttp.ClientSession = aiohttp.ClientSession(
         headers=headers
     )
-    url = app.url_for(
+    main_end = app.url_for(
         "check-imei",
-        _external=True,
-        _server="localhost:8000"
     )
+
+    refresh_end = app.url_for(
+        "refresh",
+    )
+
+    command = (
+        f"python {BOTFILE_NAME} --login-end login/ "
+        f"--refresh-end {refresh_end} --main-end {main_end}"
+    )
+
     subprocess.Popen(
-        f"python {BOTFILE_NAME} --api-path {url}",
+        command,
         shell=True,
     )
 
@@ -54,11 +69,25 @@ async def close_session(app):
     await app.ctx.aiohttp_session.close()
 
 
-@app.post("/check-imei", name="check-imei")
-async def get_imei_info(request):
-    token = request.token
-    # auth for my API must be written later
+@app.post("/refresh")
+async def refresh(request):
+    data = request.json
+    refresh_token = data.get("refresh_token")
 
+    if not refresh_token or refresh_token not in app_login.refresh_tokens:
+        return json(
+            {"error": "Invalid refresh token"}, status=HTTPStatus.UNAUTHORIZED
+        )
+
+    new_access_token = app_login.generate_token(
+        app_login.refresh_tokens[refresh_token]
+    )
+    return json({"access_token": new_access_token}, HTTPStatus.OK)
+
+
+@app.post("/check-imei", name="check-imei")
+# @protected
+async def get_imei_info(request):
     payload = {
         "deviceId": request.args.get("imei"),
         "serviceId": 15,
