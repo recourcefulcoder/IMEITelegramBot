@@ -4,7 +4,6 @@ import logging
 import os
 import sys
 from http import HTTPStatus
-from pathlib import Path
 from typing import Any, Awaitable, Callable, Dict, Final
 
 from aiogram import Bot, Dispatcher, html
@@ -17,18 +16,7 @@ from aiogram.types import Message
 
 import aiohttp
 
-from dotenv import load_dotenv
-
 from utils import imei_valid
-
-
-BASE_DIR = Path(__file__).resolve().parent
-env_file = os.path.join(BASE_DIR.parent, ".env")
-load_dotenv(env_file)
-if os.path.isfile(env_file):
-    load_dotenv(env_file)
-else:
-    load_dotenv(os.path.join(BASE_DIR, ".env.example"))
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -43,14 +31,14 @@ parser.add_argument(
     dest="login_endpoint",
     type=str,
     help="API's login endpoint",
-    default="login/",
+    default="/login",
 )
 parser.add_argument(
     "--refresh-end",
     dest="refresh_endpoint",
     type=str,
     help="API's refreshing token endpoint",
-    default="refresh/",
+    default="/refresh",
 )
 parser.add_argument(
     "--main-end",
@@ -63,7 +51,6 @@ args = parser.parse_args()
 
 
 TOKEN: Final = os.getenv("BOT_TOKEN")
-BOT_USERNAME: Final = "IMEI_API_BOT"
 ID_WHITELIST: Final = {7835373811}
 
 API_URL: Final = args.api_url
@@ -72,6 +59,7 @@ MAIN_ENDPOINT: Final = args.main_endpoint
 REFRESH_ENDPOINT: Final = args.refresh_endpoint
 
 API_PASSWORD: Final = os.getenv("API_BOT_PASSWORD")
+API_BOT_USERNAME: Final = os.getenv("API_BOT_USERNAME", default="TELEGRAM_BOT")
 
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher(storage=MemoryStorage())
@@ -104,8 +92,12 @@ async def user_allowed(
 
 
 async def login(session: aiohttp.ClientSession):
+    credentials = {
+        "password": API_PASSWORD,
+        "username": API_BOT_USERNAME,
+    }
     async with session.post(
-        f"{API_URL}/{LOGIN_ENDPOINT}", json={"password": API_PASSWORD}
+        f"{API_URL}{LOGIN_ENDPOINT}/", json=credentials
     ) as resp:
         data = await resp.json()
         if resp.status == HTTPStatus.OK:
@@ -123,7 +115,7 @@ async def login(session: aiohttp.ClientSession):
 async def refresh_token_func(session):
     """Refresh the access token"""
     async with session.post(
-        f"{API_URL}/{REFRESH_ENDPOINT}",
+        f"{API_URL}{REFRESH_ENDPOINT}/",
         json={"refresh_token": token_holder.refresh_token},
     ) as resp:
         data = await resp.json()

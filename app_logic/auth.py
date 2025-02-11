@@ -5,8 +5,6 @@ import jwt
 
 from sanic import json
 
-from sanic_jwt import exceptions
-
 
 def protected(wrapped):
     def decorator(f):
@@ -23,7 +21,10 @@ def protected(wrapped):
                     algorithms=["HS256"],
                 )
                 if payload.get("type") != "access":
-                    raise exceptions.AuthenticationFailed("Invalid token type")
+                    return json(
+                        {"error": "Invalid token type"},
+                        HTTPStatus.UNAUTHORIZED,
+                    )
                 response = await f(request, *args, **kwargs)
                 return response
             except jwt.ExpiredSignatureError:

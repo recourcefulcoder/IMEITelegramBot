@@ -1,5 +1,7 @@
 import os
 import subprocess
+import sys
+from contextvars import ContextVar
 from http import HTTPStatus
 from pathlib import Path
 from typing import Final
@@ -12,12 +14,21 @@ import login as app_login
 
 from sanic import Sanic, json
 
+from sqlalchemy.ext.asyncio import async_sessionmaker
+from sqlalchemy.sql.expression import select
+
 import ujson
+
+
+BASE_DIR = Path(__file__).resolve().parent
+sys.path.append(str(BASE_DIR.parent))
+
+import database.models as models
+from database.engine import bind
 
 # from auth import protected
 
 
-BASE_DIR = Path(__file__).resolve().parent
 env_file = os.path.join(BASE_DIR.parent, ".env")
 if os.path.isfile(env_file):
     load_dotenv(env_file)
@@ -33,7 +44,9 @@ with open(os.path.join(BASE_DIR.parent, "tokens.json"), "r") as f:
 
 app = Sanic("IMEI")
 app.config.SECRET = os.getenv("SECRET_KEY")
-app.blueprint(app_login.login)
+
+_sessionmaker = async_sessionmaker(bind, expire_on_commit=False)
+_base_model_session_ctx = ContextVar("session")
 
 
 @app.after_server_start
@@ -45,6 +58,10 @@ async def start_bot(app):
     app.ctx.aiohttp_session: aiohttp.ClientSession = aiohttp.ClientSession(
         headers=headers
     )
+
+    async with bind.begin() as conn:
+        await conn.run_sync(models.Base.metadata.create_all)
+
     main_end = app.url_for(
         "check-imei",
     )
@@ -53,8 +70,10 @@ async def start_bot(app):
         "refresh",
     )
 
+    login_end = app.url_for("login")
+
     command = (
-        f"python {BOTFILE_NAME} --login-end login/ "
+        f"python {BOTFILE_NAME} --login-end {login_end} "
         f"--refresh-end {refresh_end} --main-end {main_end}"
     )
 
@@ -67,6 +86,60 @@ async def start_bot(app):
 @app.before_server_stop
 async def close_session(app):
     await app.ctx.aiohttp_session.close()
+
+
+@app.middleware("request")
+async def inject_db_session(request):
+    request.ctx.session = _sessionmaker()
+    request.ctx.session_ctx_token = _base_model_session_ctx.set(
+        request.ctx.session
+    )
+
+
+@app.middleware("response")
+async def close_db_session(request, response):
+    if hasattr(request.ctx, "session_ctx_token"):
+        _base_model_session_ctx.reset(request.ctx.session_ctx_token)
+        await request.ctx.session.close()
+
+
+@app.post("/", name="login")
+async def do_login(request):
+    data = request.json()
+    if not data or "password" not in data or "username" not in data:
+        return json(
+            {
+                "error": "Invalid credential format: "
+                         "missing username and/or password"
+            },
+            HTTPStatus.UNAUTHORIZED,
+        )
+    async with request.ctx.session() as session:
+        async with session.begin():
+            result = await session.execute(
+                select(models.User).where(
+                    models.User.username == data["username"]
+                )
+            )
+            user = result.scalar()
+            if not user or not user.check_password(data["password"]):
+                return json(
+                    {"error": "Invalid password"},
+                    HTTPStatus.UNAUTHORIZED,
+                )
+
+    print("access granted")
+
+    access_token = app_login.generate_token("bot", request.app.config.SECRET)
+    refresh_token = app_login.generate_token(
+        "bot", request.app.config.SECRET, is_refresh=True
+    )
+    app_login.refresh_tokens[refresh_token] = "bot"  # Store refresh token
+
+    return json(
+        {"access_token": access_token, "refresh_token": refresh_token},
+        HTTPStatus.OK,
+    )
 
 
 @app.post("/refresh")
