@@ -8,9 +8,11 @@ from typing import Final
 
 import aiohttp
 
-from dotenv import load_dotenv
+from auth import TokenManager, protected
 
-import login as app_login
+import config
+
+from dotenv import load_dotenv
 
 from sanic import Sanic, json
 
@@ -26,8 +28,6 @@ sys.path.append(str(BASE_DIR.parent))
 import database.models as models
 from database.engine import bind
 
-# from auth import protected
-
 
 env_file = os.path.join(BASE_DIR.parent, ".env")
 if os.path.isfile(env_file):
@@ -36,51 +36,49 @@ else:
     load_dotenv(os.path.join(BASE_DIR, ".env.example"))
 
 
-IMEICHECK_URL: Final = "https://api.imeicheck.net/v1/checks"
-IMEICHECK_TOKEN: Final = os.getenv("IMEICHECK_TOKEN")
-BOTFILE_NAME: Final = "bot.py"
 with open(os.path.join(BASE_DIR.parent, "tokens.json"), "r") as f:
     TOKENS: Final = ujson.load(f)
 
 app = Sanic("IMEI")
-app.config.SECRET = os.getenv("SECRET_KEY")
+app.config.SECRET = config.JWT_SECRET_KEY
 
 _sessionmaker = async_sessionmaker(bind, expire_on_commit=False)
 _base_model_session_ctx = ContextVar("session")
 
+token_manager = TokenManager()
+
 
 @app.after_server_start
-async def start_bot(app):
+async def start_subprocesses(app):
+    """Starting a Telegram bot and Redis storage for refresh tokens"""
+    await token_manager.init_redis()
+    subprocess.Popen(
+        "redis-server",
+        shell=True,
+    )  # running Redis storage
+
     headers = {
-        "Authorization": "Bearer " + IMEICHECK_TOKEN,
+        "Authorization": "Bearer " + config.IMEICHECK_TOKEN,
         "Content-Type": "application/json",
     }
-    app.ctx.aiohttp_session: aiohttp.ClientSession = aiohttp.ClientSession(
-        headers=headers
-    )
+    app.ctx.aiohttp_session = aiohttp.ClientSession(headers=headers)
 
     async with bind.begin() as conn:
         await conn.run_sync(models.Base.metadata.create_all)
 
-    main_end = app.url_for(
-        "check-imei",
-    )
-
-    refresh_end = app.url_for(
-        "refresh",
-    )
-
+    main_end = app.url_for("check-imei")
+    refresh_end = app.url_for("refresh")
     login_end = app.url_for("login")
 
     command = (
-        f"python {BOTFILE_NAME} --login-end {login_end} "
+        f"python {config.BOTFILE_NAME} --login-end {login_end} "
         f"--refresh-end {refresh_end} --main-end {main_end}"
     )
 
     subprocess.Popen(
         command,
         shell=True,
-    )
+    )  # running Telegram Bot
 
 
 @app.before_server_stop
@@ -103,18 +101,18 @@ async def close_db_session(request, response):
         await request.ctx.session.close()
 
 
-@app.post("/", name="login")
+@app.post("/login", name="login")
 async def do_login(request):
-    data = request.json()
+    data = request.json
     if not data or "password" not in data or "username" not in data:
         return json(
             {
                 "error": "Invalid credential format: "
-                         "missing username and/or password"
+                "missing username and/or password"
             },
             HTTPStatus.UNAUTHORIZED,
         )
-    async with request.ctx.session() as session:
+    async with request.ctx.session as session:
         async with session.begin():
             result = await session.execute(
                 select(models.User).where(
@@ -128,13 +126,9 @@ async def do_login(request):
                     HTTPStatus.UNAUTHORIZED,
                 )
 
-    print("access granted")
-
-    access_token = app_login.generate_token("bot", request.app.config.SECRET)
-    refresh_token = app_login.generate_token(
-        "bot", request.app.config.SECRET, is_refresh=True
-    )
-    app_login.refresh_tokens[refresh_token] = "bot"  # Store refresh token
+    access_token = await TokenManager.create_access_token(data["username"])
+    print(type(access_token))
+    refresh_token = await token_manager.create_refresh_token(data["username"])
 
     return json(
         {"access_token": access_token, "refresh_token": refresh_token},
@@ -142,24 +136,41 @@ async def do_login(request):
     )
 
 
-@app.post("/refresh")
+@app.post("/refresh", name="refresh")
 async def refresh(request):
-    data = request.json
-    refresh_token = data.get("refresh_token")
+    refresh_token = request.json.get("refresh_token")
 
-    if not refresh_token or refresh_token not in app_login.refresh_tokens:
+    if not refresh_token:
+        return json(
+            {"error": "Missing refresh token"}, status=HTTPStatus.UNAUTHORIZED
+        )
+
+    username = await token_manager.verify_refresh_token(refresh_token)
+
+    if not username:
         return json(
             {"error": "Invalid refresh token"}, status=HTTPStatus.UNAUTHORIZED
         )
 
-    new_access_token = app_login.generate_token(
-        app_login.refresh_tokens[refresh_token]
+    # username = await token_manager.get_username(refresh_token)
+    await token_manager.delete_refresh_token(username)
+
+    new_refresh_token = await token_manager.create_refresh_token(username)
+    new_access_token = await TokenManager.create_access_token(
+        username
     )
-    return json({"access_token": new_access_token}, HTTPStatus.OK)
+
+    return json(
+        {
+            "access_token": new_access_token,
+            "refresh_token": new_refresh_token
+        },
+        HTTPStatus.OK
+    )
 
 
 @app.post("/check-imei", name="check-imei")
-# @protected
+@protected
 async def get_imei_info(request):
     payload = {
         "deviceId": request.args.get("imei"),
@@ -167,7 +178,7 @@ async def get_imei_info(request):
     }
 
     async with app.ctx.aiohttp_session.post(
-        IMEICHECK_URL, json=payload
+        config.IMEICHECK_URL, json=payload
     ) as response:
         ans = await response.json()
     return json(ans)

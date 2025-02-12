@@ -7,8 +7,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 url_object = URL.create(
     "postgresql+asyncpg",
     username="postgres",
-    password=os.getenv("DB_PASSWORD"),
-    # password="Hahy3tuuz",
+    password=os.getenv("DB_PASSWORD", default="postgres"),
     host="localhost",
     port=5432,
     database="imei_api",

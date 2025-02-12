@@ -1,10 +1,9 @@
 import argparse
 import asyncio
 import logging
-import os
 import sys
 from http import HTTPStatus
-from typing import Any, Awaitable, Callable, Dict, Final
+from typing import Any, Awaitable, Callable, Dict, Final, Tuple
 
 from aiogram import Bot, Dispatcher, html
 from aiogram.client.default import DefaultBotProperties
@@ -15,6 +14,8 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import Message
 
 import aiohttp
+
+import config
 
 from utils import imei_valid
 
@@ -49,19 +50,16 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-
-TOKEN: Final = os.getenv("BOT_TOKEN")
-ID_WHITELIST: Final = {7835373811}
-
 API_URL: Final = args.api_url
 LOGIN_ENDPOINT: Final = args.login_endpoint
 MAIN_ENDPOINT: Final = args.main_endpoint
 REFRESH_ENDPOINT: Final = args.refresh_endpoint
 
-API_PASSWORD: Final = os.getenv("API_BOT_PASSWORD")
-API_BOT_USERNAME: Final = os.getenv("API_BOT_USERNAME", default="TELEGRAM_BOT")
 
-bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+bot = Bot(
+    token=config.BOT_TOKEN,
+    default=DefaultBotProperties(parse_mode=ParseMode.HTML),
+)
 dp = Dispatcher(storage=MemoryStorage())
 
 
@@ -78,13 +76,26 @@ class AuthorizationError(BaseException):
     pass
 
 
+async def on_startup():
+    session = aiohttp.ClientSession()
+
+    await login(session)
+    await dp.storage.set_data(key="storage", data={"session": session})
+
+
+async def on_shutdown():
+    data = await dp.storage.get_data("storage")
+    session: aiohttp.ClientSession = data["session"]
+    await session.close()
+
+
 @dp.message.outer_middleware()
 async def user_allowed(
     handler: Callable[[Message, Dict[str, Any]], Awaitable[Any]],
     event: Message,
     data: Dict[str, Any],
 ) -> Any:
-    if event.from_user.id not in ID_WHITELIST:
+    if event.from_user.id not in config.ID_WHITELIST:
         return await event.answer(
             f"Unauthorized: id {event.from_user.id} not allowed"
         )
@@ -93,8 +104,8 @@ async def user_allowed(
 
 async def login(session: aiohttp.ClientSession):
     credentials = {
-        "password": API_PASSWORD,
-        "username": API_BOT_USERNAME,
+        "password": config.API_PASSWORD,
+        "username": config.API_BOT_USERNAME,
     }
     async with session.post(
         f"{API_URL}{LOGIN_ENDPOINT}/", json=credentials
@@ -104,7 +115,6 @@ async def login(session: aiohttp.ClientSession):
             token_holder.access_token = data["access_token"]
             token_holder.refresh_token = data["refresh_token"]
         elif resp.status == HTTPStatus.UNAUTHORIZED:
-            print(data, resp.status)
             raise AuthorizationError(
                 "Critical error - invalid bot auth credentials!"
             )
@@ -113,7 +123,7 @@ async def login(session: aiohttp.ClientSession):
 
 
 async def refresh_token_func(session):
-    """Refresh the access token"""
+    """Refresh the access token for Telegram Bot"""
     async with session.post(
         f"{API_URL}{REFRESH_ENDPOINT}/",
         json={"refresh_token": token_holder.refresh_token},
@@ -121,25 +131,9 @@ async def refresh_token_func(session):
         data = await resp.json()
         if resp.status == HTTPStatus.OK:
             token_holder.access_token = data["access_token"]
+            token_holder.refresh_token = data["refresh_token"]
         else:
-            raise AuthorizationError("Unexpected error occured")
-
-
-async def on_startup():
-    session = aiohttp.ClientSession()
-    # login_task = asyncio.create_task(login(session))
-    storage_task = asyncio.create_task(
-        dp.storage.set_data(key="storage", data={"session": session})
-    )
-
-    # await login_task
-    await storage_task
-
-
-async def on_shutdown():
-    data = await dp.storage.get_data("storage")
-    session: aiohttp.ClientSession = data["session"]
-    await session.close()
+            raise AuthorizationError("Unexpected error occurred")
 
 
 @dp.message(CommandStart())
@@ -147,35 +141,46 @@ async def command_start_handler(message: Message) -> None:
     await message.answer(f"Hello, {html.bold(message.from_user.full_name)}!")
 
 
+async def send_api_request(session: aiohttp.ClientSession, imei: str) -> Tuple[str, int]:
+    """Sends request to API service and returns tuple: JSON string + response code"""
+    async with session.post(
+            f"{API_URL}{MAIN_ENDPOINT}/",
+            params={"imei": imei},
+            headers={"Authorization": f"Bearer {token_holder.access_token}"},
+    ) as response:
+        log = logging.getLogger(__name__)
+        json = await response.json()
+        status = response.status
+        if status == HTTPStatus.OK:
+            log.info(json)
+
+    return str(json), status
+
+
 @dp.message(Command("imei"))
 async def imei_handler(message: Message) -> None:
     text = message.text.strip("imei/ ")
+    if not imei_valid(text):
+        await message.answer("invalid IMEI!")
+        return
 
     await message.answer(
         f"Your imei ({text}) was taken into execution; expect answer"
     )
 
-    if not imei_valid(text):
-        await message.answer("invalid IMEI!")
-        return
-
     data = await dp.storage.get_data("storage")
     session: aiohttp.ClientSession = data["session"]
 
-    params = {
-        "imei": text,
-        "token": 4512,
-    }
+    json, status = await send_api_request(session, text)
 
-    async with session.post(
-        f"{API_URL}{MAIN_ENDPOINT}/",
-        params=params,
-        headers={"Authorization": f"Bearer {token_holder.access_token}"},
-    ) as response:
-        log = logging.getLogger(__name__)
-        text = await response.text()
-        log.info(text)
-        await message.answer(f"IMEI DATA:\n{text}")
+    if status == HTTPStatus.UNAUTHORIZED:
+        await refresh_token_func(session)
+        json, status = await send_api_request(session, text)
+    if status == HTTPStatus.UNAUTHORIZED:
+        await login(session)
+        json, status = await send_api_request(session, text)
+
+    await message.answer(f"IMEI DATA:\n{json}")
 
 
 @dp.message()

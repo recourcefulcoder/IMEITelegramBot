@@ -5,7 +5,6 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.sql.expression import select
 
-
 Base = declarative_base()
 
 
@@ -13,7 +12,7 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, Sequence("user_id_seq"), primary_key=True)
-    username = Column(String(100))
+    username = Column(String(100), unique=True)
     email = Column(String(100))
     password = Column(String)
 
@@ -26,6 +25,12 @@ class User(Base):
         pwhash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
         self.password = pwhash.decode("utf-8")
         return self.password
+
+
+async def get_db_metadata(engine):
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    return Base.metadata
 
 
 async def create_user(
