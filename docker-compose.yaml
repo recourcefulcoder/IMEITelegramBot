@@ -1,0 +1,41 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:17
+    container_name: postgres-db
+    restart: always
+    env_file: ".env"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: imei_api
+      HOSTNAME: host.docker.internal
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    container_name: redis-storage
+    restart: always
+    environment:
+      HOSTNAME: host.docker.internal
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  imei-app:
+    image: imei-app:1.0
+    container_name: imei-app
+    restart: always
+    depends_on:
+      - postgres
+      - redis
+    env_file: ".env"
+    ports:
+      - "8000:8000"
+
+volumes:
+  postgres_data:
+  redis_data:

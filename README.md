@@ -71,7 +71,9 @@ Environmental variables:
 to "TELEGRAM_BOT" if not provided
 + **API_BOT_PASSWORD** - Bot's password for accessing API
 + **SECRET_KEY** - used for JWT-based auth
-+ **DB_PASSWORD** - stores database password
++ **POSTGRES_PASSWORD** - stores database password
++ **HOSTNAME** - stores the name of the host to be used; for docker environments will be 
+host.docker.internal
 
 ### Constants
 Majority of used constants are stored in _config.py_, except for a few related to bot, stored in _bot.py_ 
@@ -138,3 +140,10 @@ stores it in redis storage and returns token as a return-value
 such in redis storage; if it finds such token, it returns user's username; if it doesn't - it returns None
 + delete_refresh_token(self, username: str) -> None - accepts username whose refresh_token is stored in redis
 and deletes it from redis storage.
+
+### Docker
+To run a server with redis and postgres as special containers, simply run from the project root directory
+```bash
+docker build -t imei-app:1.0 .
+docker-compose -f docker-compose.yaml up
+```

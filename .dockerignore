@@ -1,0 +1,7 @@
+.git/
+.idea/
+venv/
+docker-compose.yaml
+Dockerfile
+.dockerignore
+personal/

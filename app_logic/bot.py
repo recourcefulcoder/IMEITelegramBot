@@ -132,8 +132,6 @@ async def refresh_token_func(session):
         if resp.status == HTTPStatus.OK:
             token_holder.access_token = data["access_token"]
             token_holder.refresh_token = data["refresh_token"]
-        else:
-            raise AuthorizationError("Unexpected error occurred")
 
 
 @dp.message(CommandStart())
@@ -141,12 +139,14 @@ async def command_start_handler(message: Message) -> None:
     await message.answer(f"Hello, {html.bold(message.from_user.full_name)}!")
 
 
-async def send_api_request(session: aiohttp.ClientSession, imei: str) -> Tuple[str, int]:
+async def send_api_request(
+    session: aiohttp.ClientSession, imei: str
+) -> Tuple[str, int]:
     """Sends request to API service and returns tuple: JSON string + response code"""
     async with session.post(
-            f"{API_URL}{MAIN_ENDPOINT}/",
-            params={"imei": imei},
-            headers={"Authorization": f"Bearer {token_holder.access_token}"},
+        f"{API_URL}{MAIN_ENDPOINT}/",
+        params={"imei": imei},
+        headers={"Authorization": f"Bearer {token_holder.access_token}"},
     ) as response:
         log = logging.getLogger(__name__)
         json = await response.json()

@@ -1,14 +1,14 @@
-import os
-
 from sqlalchemy import URL
 from sqlalchemy.ext.asyncio import create_async_engine
+
+import app_logic.config as config
 
 
 url_object = URL.create(
     "postgresql+asyncpg",
     username="postgres",
-    password=os.getenv("DB_PASSWORD", default="postgres"),
-    host="localhost",
+    password=config.POSTGRES_PASSWORD,
+    host=config.HOSTNAME,
     port=5432,
     database="imei_api",
 )

@@ -5,17 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e6a2d670-177e-4fcf-972d-fa1b4a0b5fca" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/app_logic/config.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/database/create_database.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.dockerignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app_logic/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docker-compose.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app_logic/auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/app_logic/auth.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app_logic/bot.py" beforeDir="false" afterPath="$PROJECT_DIR$/app_logic/bot.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app_logic/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/app_logic/config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app_logic/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/app_logic/server.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/engine.py" beforeDir="false" afterPath="$PROJECT_DIR$/database/engine.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/database/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tokens.json" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -54,6 +56,7 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="E:\Работа\test_tasks\IMEITelegramBot\app_logic" />
       <recent name="E:\Работа\test_tasks\IMEITelegramBot\imei\api" />
       <recent name="E:\Работа\test_tasks\IMEITelegramBot" />
     </key>
@@ -67,11 +70,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="C:\Users\HP\AppData\Local\Programs\Python\Python39\python.exe" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/imei/api" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/app_logic" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/imei/api/bot.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/app_logic/main.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -97,7 +100,34 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="origin/sanic_switch" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="Branch">
+          <value>
+            <list>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="origin/sanic_switch" />
+                </option>
+              </RecentGroup>
+            </list>
           </value>
         </entry>
       </map>

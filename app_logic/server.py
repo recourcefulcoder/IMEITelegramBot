@@ -36,9 +36,6 @@ else:
     load_dotenv(os.path.join(BASE_DIR, ".env.example"))
 
 
-with open(os.path.join(BASE_DIR.parent, "tokens.json"), "r") as f:
-    TOKENS: Final = ujson.load(f)
-
 app = Sanic("IMEI")
 app.config.SECRET = config.JWT_SECRET_KEY
 
@@ -53,7 +50,7 @@ async def start_subprocesses(app):
     """Starting a Telegram bot and Redis storage for refresh tokens"""
     await token_manager.init_redis()
     subprocess.Popen(
-        "redis-server",
+        "redis-server --port 6379",
         shell=True,
     )  # running Redis storage
 
@@ -152,25 +149,19 @@ async def refresh(request):
             {"error": "Invalid refresh token"}, status=HTTPStatus.UNAUTHORIZED
         )
 
-    # username = await token_manager.get_username(refresh_token)
     await token_manager.delete_refresh_token(username)
 
     new_refresh_token = await token_manager.create_refresh_token(username)
-    new_access_token = await TokenManager.create_access_token(
-        username
-    )
+    new_access_token = await TokenManager.create_access_token(username)
 
     return json(
-        {
-            "access_token": new_access_token,
-            "refresh_token": new_refresh_token
-        },
-        HTTPStatus.OK
+        {"access_token": new_access_token, "refresh_token": new_refresh_token},
+        HTTPStatus.OK,
     )
 
 
 @app.post("/check-imei", name="check-imei")
-@protected
+# @protected
 async def get_imei_info(request):
     payload = {
         "deviceId": request.args.get("imei"),

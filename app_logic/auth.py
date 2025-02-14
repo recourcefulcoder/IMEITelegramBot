@@ -60,7 +60,10 @@ class TokenManager:
 
     @staticmethod
     async def create_access_token(identity: str):
-        exp_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=15)
+        """Generate access token from userdata"""
+        exp_time = datetime.datetime.now(
+            datetime.timezone.utc
+        ) + datetime.timedelta(minutes=15)
         payload = {
             "sub": identity,
             "exp": exp_time,
@@ -80,7 +83,6 @@ class TokenManager:
             algorithm="HS256",
         )
 
-        # Store refresh token in Redis with expiration
         await self.redis.setex(
             f"refresh:{username}",
             config.REFRESH_TOKEN_EXPIRE,
