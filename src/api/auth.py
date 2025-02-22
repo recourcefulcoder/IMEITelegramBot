@@ -1,7 +1,7 @@
 import datetime
 from functools import wraps
-from typing import Optional
 from http import HTTPStatus
+from typing import Optional
 
 import config
 

@@ -5,19 +5,31 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e6a2d670-177e-4fcf-972d-fa1b4a0b5fca" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.dockerignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app_logic/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docker-compose.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/api/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/api/auth.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/api/bot.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/api/login.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/api/utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/config.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/database/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/database/create_database.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/database/engine.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/database/models.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/server.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/IMEITelegramBot.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/IMEITelegramBot.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app_logic/auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/app_logic/auth.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app_logic/bot.py" beforeDir="false" afterPath="$PROJECT_DIR$/app_logic/bot.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app_logic/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/app_logic/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app_logic/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/app_logic/server.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/engine.py" beforeDir="false" afterPath="$PROJECT_DIR$/database/engine.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tokens.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app_logic/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app_logic/auth.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app_logic/bot.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app_logic/config.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app_logic/login.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app_logic/server.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app_logic/utils.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/create_database.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/engine.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/models.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,7 +63,7 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/src" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">

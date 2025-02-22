@@ -5,7 +5,7 @@ from typing import Final
 
 IMEICHECK_URL: Final = "https://api.imeicheck.net/v1/checks"
 IMEICHECK_TOKEN: Final = os.getenv("IMEICHECK_TOKEN")
-BOTFILE_NAME: Final = "bot.py"
+BOTFILE_NAME: Final = "api/bot.py"
 
 BOT_TOKEN: Final = os.getenv("BOT_TOKEN")
 ID_WHITELIST: Final = {7835373811}

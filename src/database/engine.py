@@ -1,7 +1,7 @@
 from sqlalchemy import URL
 from sqlalchemy.ext.asyncio import create_async_engine
 
-import app_logic.config as config
+import config
 
 
 url_object = URL.create(

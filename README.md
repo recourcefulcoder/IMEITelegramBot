@@ -89,7 +89,7 @@ related to current config.py file location
 environment variable is not provided
 
 > [!WARNING]
-> server.py contains constant called BOTFILE_NAME, which stores the name of python file, 
+> config.py contains constant called BOTFILE_NAME, which stores the name of python file, 
 > describing the bot behavior; if you will EVER change this file's name/location, make sure 
 > to change this constant on your own!
 

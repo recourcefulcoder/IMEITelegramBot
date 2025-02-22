@@ -1,16 +1,18 @@
 import os
-import subprocess
 import sys
+import subprocess
 from contextvars import ContextVar
 from http import HTTPStatus
 from pathlib import Path
-from typing import Final
 
 import aiohttp
 
-from auth import TokenManager, protected
+from api.auth import TokenManager
 
 import config
+
+import database.models as models
+from database.engine import bind
 
 from dotenv import load_dotenv
 
@@ -19,16 +21,8 @@ from sanic import Sanic, json
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.sql.expression import select
 
-import ujson
-
 
 BASE_DIR = Path(__file__).resolve().parent
-sys.path.append(str(BASE_DIR.parent))
-
-import database.models as models
-from database.engine import bind
-
-
 env_file = os.path.join(BASE_DIR.parent, ".env")
 if os.path.isfile(env_file):
     load_dotenv(env_file)
@@ -72,9 +66,16 @@ async def start_subprocesses(app):
         f"--refresh-end {refresh_end} --main-end {main_end}"
     )
 
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(BASE_DIR) + (
+        ":" + env["PYTHONPATH"] if "PYTHONPATH" in env else ""
+    )  # this is done to allow bot.py import "config.py" file, stored
+    # in main project's directory
+
     subprocess.Popen(
         command,
         shell=True,
+        env=env,
     )  # running Telegram Bot
 
 
