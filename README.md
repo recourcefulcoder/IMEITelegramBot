@@ -28,6 +28,21 @@ cd database
 python create_database.py
 ```
 
+#### Create environment file
+Create .env file in the root directory of the project and fill it as .env.example; required env variables
+are described below
+
+#### Create whitelist.json
+
+In the source directory of the project (i.e. "src"), on the same level as "config.py" file create file
+"whitelist.json", which contains a json-string, describing all Telegram user ID's those are allowed to 
+access the bot; it must look like following:
+```json
+[
+  7835373821, 8338273811, 7835374311, ...
+]
+```
+
 #### Run the application
 to run an API in debug mode run the following command in CLI (being in the root directory of the project):
 ```bash
@@ -88,6 +103,14 @@ related to current config.py file location
 + **API_BOT_USERNAME** storing bot's login username for API; defaults to "TELEGRAM_BOT" if corresponding
 environment variable is not provided
 
+
++ **JWT_SECRET_KEY** - secret key value, used for scryptographical purposes
++ **POSTGRES_PASSWORD** - password for accessing postgresql database 
++ **REDIS_URL** - url for accessing Redis-storage database (used for storing access tokens)
++ **REFRESH_TOKEN_EXPIRE** - [datetime.datetime](https://docs.python.org/3/library/datetime.html#datetime-objects) 
+object, representing lifetime of refresh token
++ **ACCESS_TOKEN_EXPIRE** - datetime.datetime object, representing lifetime of access JWT token
+
 > [!WARNING]
 > config.py contains constant called BOTFILE_NAME, which stores the name of python file, 
 > describing the bot behavior; if you will EVER change this file's name/location, make sure 
@@ -146,4 +169,10 @@ To run a server with redis and postgres as special containers, simply run from t
 ```bash
 docker build -t imei-app:1.0 .
 docker-compose -f docker-compose.yaml up
+```
+
+### Test
+For running test, from the source directory of the project (i.e. "/src") run following:
+```bash
+python -m pytest
 ```

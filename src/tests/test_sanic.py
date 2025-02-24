@@ -4,7 +4,14 @@ import pytest
 
 from sanic_testing.testing import SanicASGITestClient
 
-from server import app
+import server
+
+
+# @pytest.fixture
+# def app():
+#     import config
+#     from server import app
+#     return app
 
 
 @pytest.mark.parametrize(
@@ -24,7 +31,7 @@ from server import app
     ]
 )
 @pytest.mark.asyncio
-async def test_invalid_login(credentials):
-    test_client = SanicASGITestClient(app)
-    response = await test_client.post(app.url_for("login"), data=credentials)
+async def test_invalid_login(credentials,):
+    test_client = SanicASGITestClient(server.app)
+    response = await test_client.post(server.app.url_for("login"), data=credentials)
     assert response.status_code == HTTPStatus.UNAUTHORIZED

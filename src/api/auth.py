@@ -25,7 +25,7 @@ def protected(wrapped):
                 payload = jwt.decode(
                     request.token,
                     # request.app.config.SECRET,
-                    config.JWT_SECRET_KEY,
+                    request.app.config.JWT_SECRET_KEY,
                     algorithms=["HS256"],
                 )
                 if payload.get("type") != "access":
@@ -63,7 +63,7 @@ class TokenManager:
         """Generate access token from userdata"""
         exp_time = datetime.datetime.now(
             datetime.timezone.utc
-        ) + datetime.timedelta(minutes=15)
+        ) + config.ACCESS_TOKEN_EXPIRE
         payload = {
             "sub": identity,
             "exp": exp_time,

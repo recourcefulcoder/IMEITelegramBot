@@ -173,3 +173,5 @@ cython_debug/
 personal
 
 **/dump.rdb
+
+**/whitelist.json

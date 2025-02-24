@@ -1,5 +1,4 @@
 import os
-import sys
 import subprocess
 from contextvars import ContextVar
 from http import HTTPStatus
@@ -7,7 +6,7 @@ from pathlib import Path
 
 import aiohttp
 
-from api.auth import TokenManager
+from api.auth import TokenManager, protected
 
 import config
 
@@ -31,7 +30,7 @@ else:
 
 
 app = Sanic("IMEI")
-app.config.SECRET = config.JWT_SECRET_KEY
+app.update_config("./config.py")
 
 _sessionmaker = async_sessionmaker(bind, expire_on_commit=False)
 _base_model_session_ctx = ContextVar("session")
@@ -49,7 +48,7 @@ async def start_subprocesses(app):
     )  # running Redis storage
 
     headers = {
-        "Authorization": "Bearer " + config.IMEICHECK_TOKEN,
+        "Authorization": "Bearer " + app.config.IMEICHECK_TOKEN,
         "Content-Type": "application/json",
     }
     app.ctx.aiohttp_session = aiohttp.ClientSession(headers=headers)
@@ -62,7 +61,7 @@ async def start_subprocesses(app):
     login_end = app.url_for("login")
 
     command = (
-        f"python {config.BOTFILE_NAME} --login-end {login_end} "
+        f"python {app.config.BOTFILE_NAME} --login-end {login_end} "
         f"--refresh-end {refresh_end} --main-end {main_end}"
     )
 
@@ -161,7 +160,7 @@ async def refresh(request):
 
 
 @app.post("/check-imei", name="check-imei")
-# @protected
+@protected
 async def get_imei_info(request):
     payload = {
         "deviceId": request.args.get("imei"),
@@ -169,7 +168,7 @@ async def get_imei_info(request):
     }
 
     async with app.ctx.aiohttp_session.post(
-        config.IMEICHECK_URL, json=payload
+        app.config.IMEICHECK_URL, json=payload
     ) as response:
         ans = await response.json()
     return json(ans)
