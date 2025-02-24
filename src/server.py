@@ -125,7 +125,6 @@ async def do_login(request):
                 )
 
     access_token = await TokenManager.create_access_token(data["username"])
-    print(type(access_token))
     refresh_token = await token_manager.create_refresh_token(data["username"])
 
     return json(

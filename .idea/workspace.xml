@@ -5,31 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e6a2d670-177e-4fcf-972d-fa1b4a0b5fca" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/api/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/api/auth.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/api/bot.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/api/login.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/api/utils.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/config.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/database/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/database/create_database.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/database/engine.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/database/models.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/server.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/IMEITelegramBot.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/IMEITelegramBot.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/tests/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app_logic/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app_logic/auth.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app_logic/bot.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app_logic/config.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app_logic/login.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app_logic/server.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app_logic/utils.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/create_database.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/engine.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/models.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/server.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tests/test_sanic.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/tests/test_sanic.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
