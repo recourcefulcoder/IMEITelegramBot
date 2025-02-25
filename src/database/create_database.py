@@ -1,6 +1,7 @@
 import asyncio
 
-from engine import bind
+from engine import create_bind
+
 from models import Base
 
 
@@ -10,4 +11,4 @@ async def create_db(engine):
 
 
 if __name__ == "__main__":
-    asyncio.run(create_db(bind))
+    asyncio.run(create_db(create_bind()))

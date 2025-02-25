@@ -44,10 +44,9 @@ access the bot; it must look like following:
 ```
 
 #### Run the application
-to run an API in debug mode run the following command in CLI (being in the root directory of the project):
+to run an API in debug mode run the following command in CLI (being in the "src" directory of the project):
 ```bash
-cd app_logic
-sanic server:app --debug
+sanic server:create_app --debug
 ```
 
 bot is started automatically on a project setup; 

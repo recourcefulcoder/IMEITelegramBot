@@ -142,7 +142,8 @@ async def command_start_handler(message: Message) -> None:
 async def send_api_request(
     session: aiohttp.ClientSession, imei: str
 ) -> Tuple[str, int]:
-    """Sends request to API service and returns tuple: JSON string + response code"""
+    """Sends request to API service and returns tuple:
+        JSON string + response code"""
     async with session.post(
         f"{API_URL}{MAIN_ENDPOINT}/",
         params={"imei": imei},

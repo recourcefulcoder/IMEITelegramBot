@@ -5,12 +5,16 @@ from typing import Optional
 
 import config
 
+import database.models as models
+
 import jwt
 
-from redis import asyncio as aioredis
 from redis import Redis
+from redis import asyncio as aioredis
 
-from sanic import json
+from sanic import Blueprint, json
+
+from sqlalchemy.sql.expression import select
 
 
 def protected(wrapped):
@@ -24,7 +28,6 @@ def protected(wrapped):
             try:
                 payload = jwt.decode(
                     request.token,
-                    # request.app.config.SECRET,
                     request.app.config.JWT_SECRET_KEY,
                     algorithms=["HS256"],
                 )
@@ -61,9 +64,10 @@ class TokenManager:
     @staticmethod
     async def create_access_token(identity: str):
         """Generate access token from userdata"""
-        exp_time = datetime.datetime.now(
-            datetime.timezone.utc
-        ) + config.ACCESS_TOKEN_EXPIRE
+        exp_time = (
+            datetime.datetime.now(datetime.timezone.utc)
+            + config.ACCESS_TOKEN_EXPIRE
+        )
         payload = {
             "sub": identity,
             "exp": exp_time,
@@ -113,3 +117,76 @@ class TokenManager:
     async def delete_refresh_token(self, username: str) -> None:
         """Remove refresh token from Redis"""
         await self.redis.delete(f"refresh:{username}")
+
+
+BP_NAME = "auth"
+bp = Blueprint(BP_NAME, url_prefix="/auth")
+
+
+@bp.post("/login", name="login")
+async def do_login(request):
+    data = request.json
+    if not data or "password" not in data or "username" not in data:
+        return json(
+            {
+                "error": "Invalid credential format: "
+                "missing username and/or password"
+            },
+            HTTPStatus.UNAUTHORIZED,
+        )
+    async with request.ctx.session as session:
+        async with session.begin():
+            result = await session.execute(
+                select(models.User).where(
+                    models.User.username == data["username"]
+                )
+            )
+            user = result.scalar()
+            if not user or not user.check_password(data["password"]):
+                return json(
+                    {"error": "Invalid password"},
+                    HTTPStatus.UNAUTHORIZED,
+                )
+
+    access_token = await TokenManager.create_access_token(data["username"])
+    refresh_token = (
+        await request.app.config.token_manager.create_refresh_token(
+            data["username"]
+        )
+    )
+
+    return json(
+        {"access_token": access_token, "refresh_token": refresh_token},
+        HTTPStatus.OK,
+    )
+
+
+@bp.post("/refresh", name="refresh")
+async def refresh(request):
+    refresh_token = request.json.get("refresh_token")
+
+    if not refresh_token:
+        return json(
+            {"error": "Missing refresh token"}, status=HTTPStatus.UNAUTHORIZED
+        )
+
+    username = await request.app.config.token_manager.verify_refresh_token(
+        refresh_token
+    )
+
+    if not username:
+        return json(
+            {"error": "Invalid refresh token"}, status=HTTPStatus.UNAUTHORIZED
+        )
+
+    await request.app.config.token_manager.delete_refresh_token(username)
+
+    new_refresh_token = (
+        await request.app.config.token_manager.create_refresh_token(username)
+    )
+    new_access_token = await TokenManager.create_access_token(username)
+
+    return json(
+        {"access_token": new_access_token, "refresh_token": new_refresh_token},
+        HTTPStatus.OK,
+    )

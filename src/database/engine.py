@@ -1,7 +1,7 @@
+import config
+
 from sqlalchemy import URL
 from sqlalchemy.ext.asyncio import create_async_engine
-
-import config
 
 
 url_object = URL.create(
@@ -13,7 +13,9 @@ url_object = URL.create(
     database="imei_api",
 )
 
-bind = create_async_engine(
-    url_object,
-    pool_pre_ping=True,
-)
+
+def create_bind():
+    return create_async_engine(
+        url_object,
+        pool_pre_ping=True,
+    )
