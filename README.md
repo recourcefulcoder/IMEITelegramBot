@@ -22,10 +22,9 @@ sudo apt-get install redis-server
 ```
 
 #### Create database tables
-you can make it by running following from the root directory of the project: 
+you can make it by running following from "src" directory of the project: 
 ```bash
-cd database
-python create_database.py
+python database/create_database.py
 ```
 
 #### Create environment file

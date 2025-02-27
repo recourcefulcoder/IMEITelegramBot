@@ -18,4 +18,6 @@ def create_bind():
     return create_async_engine(
         url_object,
         pool_pre_ping=True,
+        echo=True,
+        future=True,
     )

@@ -6,9 +6,6 @@ import aiohttp
 
 from api.auth import BP_NAME, TokenManager
 
-import database.models as models
-from database.engine import create_bind
-
 from dotenv import load_dotenv
 
 
@@ -34,9 +31,6 @@ async def start_subprocesses(app, loop):
         "Content-Type": "application/json",
     }
     app.ctx.aiohttp_session = aiohttp.ClientSession(headers=headers)
-
-    async with create_bind().begin() as conn:
-        await conn.run_sync(models.Base.metadata.create_all)
 
     main_end = app.url_for("check-imei")
     refresh_end = app.url_for(f"{BP_NAME}.refresh")
