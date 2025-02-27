@@ -132,7 +132,7 @@ async def do_login(request):
                 "error": "Invalid credential format: "
                 "missing username and/or password"
             },
-            HTTPStatus.UNAUTHORIZED,
+            HTTPStatus.BAD_REQUEST,
         )
     async with request.ctx.session as session:
         async with session.begin():
@@ -167,7 +167,7 @@ async def refresh(request):
 
     if not refresh_token:
         return json(
-            {"error": "Missing refresh token"}, status=HTTPStatus.UNAUTHORIZED
+            {"error": "Missing refresh token"}, status=HTTPStatus.BAD_REQUEST
         )
 
     username = await request.app.config.token_manager.verify_refresh_token(
