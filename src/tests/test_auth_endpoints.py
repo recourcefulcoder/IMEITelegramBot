@@ -9,6 +9,7 @@ from database.models import Base, User
 import pytest
 
 from sanic import Sanic
+from sanic_testing.testing import SanicASGITestClient
 
 from server import create_app
 
@@ -73,11 +74,13 @@ async def test_invalid_credentials_login(app: Sanic, credentials):
 async def test_valid_credentials_login(app: Sanic):
     credentials = {"username": "admin", "password": "admin"}
     # credentials = {}
-    _, response = await app.asgi_client.post(
+    test_client = SanicASGITestClient(app)
+    _, response = await test_client.post(
         app.url_for(f"{BP_NAME}.login"),
         data=json.dumps(credentials),
         headers={"Content-Type": "application/json"},
     )
+    print(response.text)
     assert response.status_code == HTTPStatus.OK
 
 

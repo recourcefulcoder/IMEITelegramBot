@@ -6,25 +6,18 @@ import aiohttp
 
 from api.auth import BP_NAME, TokenManager
 
-from dotenv import load_dotenv
-
-
-BASE_DIR = Path(__file__).resolve().parent
-env_file = os.path.join(BASE_DIR.parent, ".env")
-if os.path.isfile(env_file):
-    load_dotenv(env_file)
-else:
-    load_dotenv(os.path.join(BASE_DIR, ".env.example"))
+import config
 
 
 async def start_subprocesses(app, loop):
     """Starting a Telegram bot and Redis storage for refresh tokens"""
     app.config.token_manager = TokenManager()
     await app.config.token_manager.init_redis()
-    subprocess.Popen(
-        "redis-server --port 6379",
-        shell=True,
-    )  # running Redis storage
+    if config.SANIC_DEBUG:
+        subprocess.Popen(
+            "redis-server --port 6379",
+            shell=True,
+        )  # running Redis storage
 
     headers = {
         "Authorization": "Bearer " + app.config.IMEICHECK_TOKEN,
@@ -42,7 +35,7 @@ async def start_subprocesses(app, loop):
     )
 
     env = os.environ.copy()
-    env["PYTHONPATH"] = str(BASE_DIR) + (
+    env["PYTHONPATH"] = str(Path(__file__).resolve().parent) + (
         ":" + env["PYTHONPATH"] if "PYTHONPATH" in env else ""
     )  # this is done to allow bot.py import "config.py" file, stored
     # in main project's directory

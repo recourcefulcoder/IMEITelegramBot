@@ -1,13 +1,21 @@
-FROM python:3.12-alpine
+FROM python:3.12-alpine AS builder
 
-RUN mkdir app
-
-COPY . /app
+RUN mkdir /app
 
 WORKDIR /app
 
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip
+COPY requirements.txt /app/
+RUN pip install --no-cache-dir -r requirements.txt
 
-WORKDIR app_logic
 
-CMD ["sanic", "server:app"]
+FROM python:3.12-alpine
+
+COPY --form=builder /usr/local/lib/python3.12/site-packages/ /usr/local/lib/python3.12/site-packages/
+COPY --form=builder /usr/local/bin/ /usr/local/bin/
+
+WORKDIR /app
+
+COPY . .
+
+CMD ["entrypoint.sh"]

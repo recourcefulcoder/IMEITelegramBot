@@ -1,4 +1,8 @@
+import asyncio
+
 import bcrypt
+
+from database.engine import create_bind
 
 from sqlalchemy import Column, Integer, Sequence, String
 from sqlalchemy.ext.asyncio import async_sessionmaker
@@ -34,18 +38,13 @@ async def get_db_metadata(engine):
 
 
 async def create_user(
-    engine, async_session, username, password, email="example@example.com"
+    async_session, username, password, email="example@example.com"
 ):
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-
     user = User(username=username, email=email)
     user.set_password(password)
     async with async_session() as session:
         async with session.begin():
             session.add(user)
-
-    await engine.dispose()
 
 
 async def check_pass(engine, username, password):
@@ -62,3 +61,8 @@ async def check_pass(engine, username, password):
             print(f"PASSWORDS_MATCH: {user.check_password(password)}")
 
     await engine.dispose()
+
+
+# if __name__ == "__main__":
+#     session = async_sessionmaker(create_bind(), expire_on_commit=False)
+#     asyncio.run(create_user(session, "TELEGRAM_BOT", "Harmonica52"))

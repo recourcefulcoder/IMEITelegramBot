@@ -11,14 +11,18 @@ from sanic import Sanic, json
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 
+_sessionmaker = async_sessionmaker(create_bind(), expire_on_commit=False)
+_base_model_session_ctx = ContextVar("session")
+
+
 def create_app():
     app = Sanic("IMEI")
     app.update_config("./config.py")
 
-    _sessionmaker = async_sessionmaker(create_bind(), expire_on_commit=False)
-    _base_model_session_ctx = ContextVar("session")
-
     app.blueprint(auth_bp)
+
+    app.register_listener(start_subprocesses, "after_server_start")
+    app.register_listener(close_session, "before_server_stop")
 
     @app.middleware("request")
     async def inject_db_session_inside(request):
@@ -46,9 +50,6 @@ def create_app():
         ) as response:
             ans = await response.json()
         return json(ans)
-
-    app.register_listener(start_subprocesses, "after_server_start")
-    app.register_listener(close_session, "before_server_stop")
 
     return app
 

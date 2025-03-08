@@ -84,9 +84,11 @@ Environmental variables:
 to "TELEGRAM_BOT" if not provided
 + **API_BOT_PASSWORD** - Bot's password for accessing API
 + **SECRET_KEY** - used for JWT-based auth
-+ **POSTGRES_PASSWORD** - stores database password
 + **HOSTNAME** - stores the name of the host to be used; for docker environments will be 
 host.docker.internal
++ **POSTGRES_PASSWORD** - stores database password
++ **POSTGRES_USER** - stores database username
++ **POSTGRES_DB** - stores database name
 
 ### Constants
 Majority of used constants are stored in _config.py_, except for a few related to bot, stored in _bot.py_ 
