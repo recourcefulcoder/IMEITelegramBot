@@ -1,8 +1,8 @@
 import config
 
 from sqlalchemy import URL
-from sqlalchemy.pool import AsyncAdaptedQueuePool
 from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.pool import AsyncAdaptedQueuePool
 
 url_object = URL.create(
     "postgresql+asyncpg",
@@ -15,10 +15,14 @@ url_object = URL.create(
 
 
 def create_bind():
+    echo_value = False
+    if config.SANIC_DEBUG:
+        echo_value = "debug"
+
     return create_async_engine(
         url_object,
         pool_pre_ping=True,
         poolclass=AsyncAdaptedQueuePool,
         pool_recycle=1800,
-        echo="debug",
+        echo=echo_value,
     )

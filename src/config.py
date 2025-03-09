@@ -7,13 +7,20 @@ from typing import Final
 from dotenv import load_dotenv
 
 
-def load_environ():
-    BASE_DIR = Path(__file__).resolve().parent
-    env_file = os.path.join(BASE_DIR.parent, ".env")
+def load_environ(levels: int = 1):
+    """
+    Loads environment from .env file
+    :param levels - specifies how many directories up is
+    .env from executing file
+    """
+    base_dir = Path(__file__).resolve()
+    for _ in range(levels):
+        base_dir = base_dir.parent
+    env_file = os.path.join(base_dir.parent, ".env")
     if os.path.isfile(env_file):
         load_dotenv(env_file)
     else:
-        load_dotenv(os.path.join(BASE_DIR, ".env.example"))
+        load_dotenv(os.path.join(base_dir, ".env.example"))
 
 
 load_environ()

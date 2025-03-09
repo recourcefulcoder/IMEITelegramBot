@@ -1,8 +1,4 @@
-import asyncio
-
 import bcrypt
-
-from database.engine import create_bind
 
 from sqlalchemy import Column, Integer, Sequence, String
 from sqlalchemy.ext.asyncio import async_sessionmaker
@@ -20,14 +16,18 @@ class User(Base):
     email = Column(String(100))
     password = Column(String)
 
+    @staticmethod
+    def hash_password(password: str) -> str:
+        pwhash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+        return pwhash.decode("utf-8")
+
     def check_password(self, password: str) -> bool:
         return bcrypt.checkpw(
             password.encode("utf-8"), self.password.encode("utf-8")
         )
 
     def set_password(self, password: str) -> str:
-        pwhash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
-        self.password = pwhash.decode("utf-8")
+        self.password = type(self).hash_password(password)
         return self.password
 
 
@@ -49,8 +49,6 @@ async def create_user(
 
 async def check_pass(engine, username, password):
     async_session = async_sessionmaker(engine, expire_on_commit=False)
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
 
     async with async_session() as session:
         async with session.begin():
@@ -58,11 +56,5 @@ async def check_pass(engine, username, password):
                 select(User).where(User.username == username)
             )
             user = result.scalar()
-            print(f"PASSWORDS_MATCH: {user.check_password(password)}")
 
-    await engine.dispose()
-
-
-# if __name__ == "__main__":
-#     session = async_sessionmaker(create_bind(), expire_on_commit=False)
-#     asyncio.run(create_user(session, "TELEGRAM_BOT", "Harmonica52"))
+            return user.check_password(password)

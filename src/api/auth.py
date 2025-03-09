@@ -135,12 +135,9 @@ async def do_login(request):
             HTTPStatus.BAD_REQUEST,
         )
 
-    print("before starting session query")
     result = await request.ctx.session.execute(
         select(models.User).where(models.User.username == data["username"])
     )
-
-    print("result achieved")
 
     user = result.scalar()
     if not user or not user.check_password(data["password"]):
@@ -148,8 +145,6 @@ async def do_login(request):
             {"error": "Invalid password"},
             HTTPStatus.UNAUTHORIZED,
             )
-
-    print("user validated")
 
     access_token = await TokenManager.create_access_token(data["username"])
     refresh_token = (

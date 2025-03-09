@@ -1,0 +1,2 @@
+[flake8]
+exclude=venv,.github,.git,personal,.pytest_cache,alembic

@@ -9,7 +9,7 @@ services:
       POSTGRES_DB: imei_api
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 20s
+      interval: 10s
     ports:
       - "5432:5432"
     volumes:
@@ -20,7 +20,7 @@ services:
     container_name: redis-storage
     restart: always
     healthcheck:
-      test: ["CMD_SHELL", "redis-cli ping | grep PONG"]
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -30,7 +30,7 @@ services:
       - redis_data:/data
 
   imei-app:
-    image: imei-app:1.0
+    build: .
     container_name: imei-app
     restart: always
     env_file: ".env"
