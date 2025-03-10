@@ -68,6 +68,7 @@ class TokenManager:
             datetime.datetime.now(datetime.timezone.utc)
             + config.ACCESS_TOKEN_EXPIRE
         )
+        exp_time = int(datetime.datetime.timestamp(exp_time))
         payload = {
             "sub": identity,
             "exp": exp_time,
@@ -81,6 +82,7 @@ class TokenManager:
             datetime.datetime.now(datetime.timezone.utc)
             + config.REFRESH_TOKEN_EXPIRE
         )
+        exp_time = int(datetime.datetime.timestamp(exp_time))
         refresh_token = jwt.encode(
             {"sub": username, "exp": exp_time},
             config.JWT_SECRET_KEY,
@@ -144,7 +146,7 @@ async def do_login(request):
         return json(
             {"error": "Invalid password"},
             HTTPStatus.UNAUTHORIZED,
-            )
+        )
 
     access_token = await TokenManager.create_access_token(data["username"])
     refresh_token = (

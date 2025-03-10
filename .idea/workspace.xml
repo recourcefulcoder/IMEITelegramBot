@@ -5,18 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e6a2d670-177e-4fcf-972d-fa1b4a0b5fca" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.flake8" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/alembic/versions/3356c8ec1f07_add_telegram_bot_user_to_the_database.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/tests/testvars.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker-compose.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/entrypoint.sh" beforeDir="false" afterPath="$PROJECT_DIR$/entrypoint.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/api/auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/auth.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/database/create_database.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/database/engine.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/database/engine.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/database/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/database/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pytest.ini" beforeDir="false" afterPath="$PROJECT_DIR$/src/pytest.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/server.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/tests/conftest.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/tests/conftest.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/tests/test_auth_endpoints.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/tests/test_auth_endpoints.py" afterDir="false" />
     </list>

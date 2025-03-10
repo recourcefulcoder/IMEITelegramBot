@@ -13,16 +13,13 @@ url_object = URL.create(
     database=config.POSTGRES_DB,
 )
 
+echo_value = False
+if config.SANIC_DEBUG:
+    echo_value = "debug"
 
-def create_bind():
-    echo_value = False
-    if config.SANIC_DEBUG:
-        echo_value = "debug"
-
-    return create_async_engine(
-        url_object,
-        pool_pre_ping=True,
-        poolclass=AsyncAdaptedQueuePool,
-        pool_recycle=1800,
-        echo=echo_value,
-    )
+bind = create_async_engine(
+    url_object,
+    pool_pre_ping=True,
+    poolclass=AsyncAdaptedQueuePool,
+    echo=echo_value,
+)

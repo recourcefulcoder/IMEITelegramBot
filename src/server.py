@@ -2,7 +2,7 @@ from contextvars import ContextVar
 
 from api.auth import bp as auth_bp, protected
 
-from database.engine import create_bind
+from database.engine import bind
 
 from listeners import close_session, start_subprocesses
 
@@ -10,8 +10,7 @@ from sanic import Sanic, json
 
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
-
-_sessionmaker = async_sessionmaker(create_bind(), expire_on_commit=False)
+_sessionmaker = async_sessionmaker(bind, expire_on_commit=False)
 _base_model_session_ctx = ContextVar("session")
 
 
